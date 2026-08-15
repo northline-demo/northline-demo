@@ -25,3 +25,5 @@ governed by Northline.
 6. `GET /version` reports the commit actually running in production.
 
 Rollback: re-run *Deploy to production* with the previous tag.
+
+<!-- ci smoke test 2026-08-15T10:31:22Z -->
