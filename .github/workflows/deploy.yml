@@ -25,6 +25,9 @@ jobs:
           ref: ${{ github.event.inputs.release_tag || github.ref }}
           fetch-depth: 0
 
+      - name: Install test dependencies
+        run: pip3 install --user --break-system-packages --quiet pytest
+
       - name: Re-run tests against the exact ref being deployed
         run: python3 -m pytest -q
 
