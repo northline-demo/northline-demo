@@ -1,0 +1,32 @@
+name: CI
+
+# Runs on every pull request. This is the "required status check".
+# It executes on YOUR hardware -- source, artefacts and secrets
+# never leave the premises.
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    name: tests
+    runs-on: [self-hosted, northline]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run the test suite
+        run: python3 -m pytest -v
+
+      - name: Build the deployable artefact
+        run: |
+          mkdir -p dist
+          tar --exclude='./dist' --exclude='./.git' -czf dist/northline-${{ github.sha }}.tar.gz .
+          ls -lh dist/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: northline-${{ github.sha }}
+          path: dist/*.tar.gz
+          retention-days: 7

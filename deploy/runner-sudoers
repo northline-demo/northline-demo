@@ -1,0 +1,10 @@
+# /etc/sudoers.d/northline-runner   (install with: sudo visudo -f /etc/sudoers.d/northline-runner)
+#
+# Least privilege. The runner is NOT root on the app server. It can do
+# exactly four things, and nothing else.
+Cmnd_Alias NORTHLINE_DEPLOY = /usr/bin/mkdir -p /opt/northline/releases/*, \
+                              /usr/bin/rsync -a --delete --exclude=.git * /opt/northline/releases/*, \
+                              /usr/bin/ln -sfn /opt/northline/releases/* /opt/northline/current, \
+                              /usr/bin/systemctl restart northline
+
+runner ALL=(root) NOPASSWD: NORTHLINE_DEPLOY

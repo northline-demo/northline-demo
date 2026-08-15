@@ -1,0 +1,57 @@
+name: Deploy to production
+
+# Only tagged releases deploy. "Delivered" means a tag in this
+# repository, not a file in an email.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Existing tag to (re-)deploy. This is the rollback path."
+        required: true
+
+jobs:
+  deploy:
+    name: on-prem
+    runs-on: [self-hosted, northline]
+    # Required reviewer lives here. A human at the CLIENT clicks deploy.
+    environment:
+      name: production
+      url: http://localhost:8080/version
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.release_tag || github.ref }}
+          fetch-depth: 0
+
+      - name: Re-run tests against the exact ref being deployed
+        run: python3 -m pytest -q
+
+      - name: Stamp the release
+        run: |
+          {
+            echo "COMMIT=$(git rev-parse --short HEAD)"
+            echo "RELEASE=${{ github.event.inputs.release_tag || github.ref_name }}"
+            echo "DEPLOYED_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "DEPLOYED_BY=${{ github.actor }}"
+          } > RELEASE
+          cat RELEASE
+
+      - name: Publish release directory
+        run: |
+          SHA=$(git rev-parse --short HEAD)
+          TARGET=/opt/northline/releases/$SHA
+          sudo -n mkdir -p "$TARGET"
+          sudo -n rsync -a --delete --exclude='.git' ./ "$TARGET/"
+          sudo -n ln -sfn "$TARGET" /opt/northline/current
+          echo "Now serving: $TARGET"
+
+      - name: Restart the service
+        run: sudo -n systemctl restart northline
+
+      - name: Verify what is actually running
+        run: |
+          sleep 2
+          curl -fsS http://localhost:8080/version
+          curl -fsS "http://localhost:8080/quote?from=Kampala&to=Gulu&tonnes=12&km=340"

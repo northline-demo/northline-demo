@@ -1,0 +1,7 @@
+# Anything that touches money needs an internal reviewer.
+# The vendor writes the code. Someone who works here reads it.
+
+/app/pricing.py      @northline-demo/internal-reviewers
+/app/consignment.py  @northline-demo/internal-reviewers
+/.github/            @northline-demo/internal-reviewers
+/deploy/             @northline-demo/internal-reviewers

@@ -1,0 +1,15 @@
+[Unit]
+Description=Northline billing service
+After=network.target
+
+[Service]
+Type=simple
+User=northline
+WorkingDirectory=/opt/northline/current
+ExecStart=/usr/bin/python3 -m app.server
+Environment=PYTHONPATH=/opt/northline/current
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target
