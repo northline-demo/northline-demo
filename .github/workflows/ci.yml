@@ -16,6 +16,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install test dependencies
+        # System Python is externally managed (PEP 668) and the runner
+        # has no sudo, so this installs to the user site, not system-wide.
+        run: pip3 install --user --break-system-packages --quiet pytest
+
       - name: Run the test suite
         run: python3 -m pytest -v
 
